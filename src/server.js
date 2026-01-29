@@ -10,6 +10,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Session middleware with proper configuration
+// Note: CSRF protection provided via sameSite: 'lax' cookie setting
+// Secure cookies enforced in production via NODE_ENV check
 app.use(session(getSessionConfig()));
 
 // Routes
