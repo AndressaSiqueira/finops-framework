@@ -83,6 +83,7 @@ describe('Session Configuration', () => {
 
     test('should set cookie maxAge to session timeout in milliseconds', () => {
       process.env.SESSION_TIMEOUT_MINUTES = '60';
+      process.env.SESSION_SECRET = 'test-secret';
       
       const config = getSessionConfig();
       
@@ -92,6 +93,7 @@ describe('Session Configuration', () => {
     });
 
     test('should configure cookie security settings', () => {
+      process.env.SESSION_SECRET = 'test-secret';
       const config = getSessionConfig();
       
       expect(config.cookie.httpOnly).toBe(true);
@@ -100,14 +102,44 @@ describe('Session Configuration', () => {
 
     test('should set secure cookie in production', () => {
       process.env.NODE_ENV = 'production';
+      process.env.SESSION_SECRET = 'secure-production-secret';
       const config = getSessionConfig();
       expect(config.cookie.secure).toBe(true);
     });
 
     test('should not set secure cookie in development', () => {
       process.env.NODE_ENV = 'development';
+      process.env.SESSION_SECRET = 'test-secret';
       const config = getSessionConfig();
       expect(config.cookie.secure).toBe(false);
+    });
+
+    test('should throw error in production without SESSION_SECRET', () => {
+      process.env.NODE_ENV = 'production';
+      delete process.env.SESSION_SECRET;
+      
+      expect(() => getSessionConfig()).toThrow('SESSION_SECRET must be set to a secure value in production');
+    });
+
+    test('should throw error in production with default SESSION_SECRET', () => {
+      process.env.NODE_ENV = 'production';
+      process.env.SESSION_SECRET = 'default-secret-change-me';
+      
+      expect(() => getSessionConfig()).toThrow('SESSION_SECRET must be set to a secure value in production');
+    });
+
+    test('should allow default secret in development with warning', () => {
+      process.env.NODE_ENV = 'development';
+      delete process.env.SESSION_SECRET;
+      
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      
+      expect(() => getSessionConfig()).not.toThrow();
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('WARNING: Using default session secret')
+      );
+      
+      consoleSpy.mockRestore();
     });
   });
 });

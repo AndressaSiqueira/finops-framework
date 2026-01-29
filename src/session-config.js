@@ -29,8 +29,20 @@ function getSessionTimeout() {
  * @returns {Object} Session configuration object
  */
 function getSessionConfig() {
+  const secret = process.env.SESSION_SECRET || 'default-secret-change-me';
+  
+  // Security check: Refuse to start in production without a proper secret
+  if (process.env.NODE_ENV === 'production' && (!process.env.SESSION_SECRET || secret === 'default-secret-change-me')) {
+    throw new Error('SESSION_SECRET must be set to a secure value in production');
+  }
+  
+  // Warn in development if using default secret
+  if (!process.env.SESSION_SECRET) {
+    console.warn('WARNING: Using default session secret. Set SESSION_SECRET environment variable for security.');
+  }
+  
   return {
-    secret: process.env.SESSION_SECRET || 'default-secret-change-me',
+    secret: secret,
     resave: false,
     saveUninitialized: false,
     cookie: {
