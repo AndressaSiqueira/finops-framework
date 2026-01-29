@@ -29,7 +29,7 @@ export class RateLimitService {
       // Check if limit is exceeded
       if (requestCount >= config.maxRequests) {
         // Get the oldest request timestamp to calculate reset time
-        const oldestRequests = await redis.zRange(key, 0, 0, { REV: false });
+        const oldestRequests = await redis.zRange(key, 0, 0);
         const resetTime = oldestRequests.length > 0 
           ? parseInt(oldestRequests[0]) + config.windowMs 
           : now + config.windowMs;
@@ -93,7 +93,7 @@ export class RateLimitService {
       const requestCount = await redis.zCard(key);
 
       // Calculate reset time
-      const oldestRequests = await redis.zRange(key, 0, 0, { REV: false });
+      const oldestRequests = await redis.zRange(key, 0, 0);
       const resetTime = oldestRequests.length > 0 
         ? parseInt(oldestRequests[0]) + config.windowMs 
         : now + config.windowMs;
