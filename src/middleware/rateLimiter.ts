@@ -5,7 +5,11 @@ import { rateLimitService } from '../services/rateLimitService';
  * Middleware to enforce rate limiting based on API key
  * Should be used after validateApiKey middleware
  */
-export function rateLimiter(req: Request, res: Response, next: NextFunction): void {
+export async function rateLimiter(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
   const apiKey = req.apiKey;
   const config = req.apiKeyConfig;
 
@@ -19,37 +23,36 @@ export function rateLimiter(req: Request, res: Response, next: NextFunction): vo
     return;
   }
 
-  rateLimitService
-    .checkRateLimit(apiKey, config.rateLimit)
-    .then((result) => {
-      // Set rate limit headers
-      res.set({
-        'X-RateLimit-Limit': result.info.limit.toString(),
-        'X-RateLimit-Remaining': result.info.remaining.toString(),
-        'X-RateLimit-Reset': result.info.reset.toString(),
-      });
+  try {
+    const result = await rateLimitService.checkRateLimit(apiKey, config.rateLimit);
 
-      if (!result.allowed) {
-        // Calculate retry after in seconds
-        const retryAfter = result.info.reset - Math.floor(Date.now() / 1000);
-        res.set('Retry-After', Math.max(0, retryAfter).toString());
-
-        res.status(429).json({
-          error: 'Too Many Requests',
-          message: 'Rate limit exceeded. Please try again later.',
-          limit: result.info.limit,
-          remaining: result.info.remaining,
-          reset: result.info.reset,
-          retryAfter: Math.max(0, retryAfter),
-        });
-        return;
-      }
-
-      next();
-    })
-    .catch((error) => {
-      console.error('Rate limiting error:', error);
-      // On error, fail open (allow the request) but log the issue
-      next();
+    // Set rate limit headers
+    res.set({
+      'X-RateLimit-Limit': result.info.limit.toString(),
+      'X-RateLimit-Remaining': result.info.remaining.toString(),
+      'X-RateLimit-Reset': result.info.reset.toString(),
     });
+
+    if (!result.allowed) {
+      // Calculate retry after in seconds
+      const retryAfter = result.info.reset - Math.floor(Date.now() / 1000);
+      res.set('Retry-After', Math.max(0, retryAfter).toString());
+
+      res.status(429).json({
+        error: 'Too Many Requests',
+        message: 'Rate limit exceeded. Please try again later.',
+        limit: result.info.limit,
+        remaining: result.info.remaining,
+        reset: result.info.reset,
+        retryAfter: Math.max(0, retryAfter),
+      });
+      return;
+    }
+
+    next();
+  } catch (error) {
+    console.error('Rate limiting error:', error);
+    // On error, fail open (allow the request) but log the issue
+    next();
+  }
 }

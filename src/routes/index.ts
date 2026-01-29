@@ -66,9 +66,9 @@ router.get('/api/v1/recommendations', validateApiKey, rateLimiter, (req: Request
 
 /**
  * Rate limit status endpoint
- * Shows current rate limit status without consuming a request
+ * Shows current rate limit status for the API key
  */
-router.get('/api/v1/rate-limit-status', validateApiKey, (req: Request, res: Response) => {
+router.get('/api/v1/rate-limit-status', validateApiKey, async (req: Request, res: Response) => {
   const apiKey = req.apiKey;
   const config = req.apiKeyConfig;
 
@@ -77,13 +77,25 @@ router.get('/api/v1/rate-limit-status', validateApiKey, (req: Request, res: Resp
     return;
   }
 
-  res.json({
-    apiKey: config.name,
-    rateLimit: {
-      windowMs: config.rateLimit.windowMs,
-      maxRequests: config.rateLimit.maxRequests,
-    },
-  });
+  try {
+    const { rateLimitService } = await import('../services/rateLimitService');
+    const status = await rateLimitService.getRateLimitStatus(apiKey, config.rateLimit);
+
+    res.json({
+      apiKey: config.name,
+      rateLimit: {
+        windowMs: config.rateLimit.windowMs,
+        maxRequests: config.rateLimit.maxRequests,
+      },
+      current: {
+        remaining: status.remaining,
+        reset: status.reset,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching rate limit status:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 export default router;

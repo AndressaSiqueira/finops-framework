@@ -52,10 +52,7 @@ describe('rateLimiter middleware', () => {
 
     (rateLimitService.checkRateLimit as jest.Mock).mockResolvedValue(rateLimitResult);
 
-    rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
-
-    // Wait for async operation
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
 
     expect(setMock).toHaveBeenCalledWith({
       'X-RateLimit-Limit': '10',
@@ -78,10 +75,7 @@ describe('rateLimiter middleware', () => {
 
     (rateLimitService.checkRateLimit as jest.Mock).mockResolvedValue(rateLimitResult);
 
-    rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
-
-    // Wait for async operation
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
 
     expect(statusMock).toHaveBeenCalledWith(429);
     expect(jsonMock).toHaveBeenCalledWith({
@@ -107,10 +101,7 @@ describe('rateLimiter middleware', () => {
 
     (rateLimitService.checkRateLimit as jest.Mock).mockResolvedValue(rateLimitResult);
 
-    rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
-
-    // Wait for async operation
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
 
     expect(setMock).toHaveBeenCalledWith({
       'X-RateLimit-Limit': '10',
@@ -119,11 +110,11 @@ describe('rateLimiter middleware', () => {
     });
   });
 
-  it('should return 500 if called without API key', () => {
+  it('should return 500 if called without API key', async () => {
     mockRequest.apiKey = undefined;
     mockRequest.apiKeyConfig = undefined;
 
-    rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
+    await rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
 
     expect(statusMock).toHaveBeenCalledWith(500);
     expect(jsonMock).toHaveBeenCalledWith({
@@ -136,10 +127,7 @@ describe('rateLimiter middleware', () => {
   it('should handle errors gracefully', async () => {
     (rateLimitService.checkRateLimit as jest.Mock).mockRejectedValue(new Error('Redis error'));
 
-    rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
-
-    // Wait for async operation
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await rateLimiter(mockRequest as Request, mockResponse as Response, nextFunction);
 
     // Should fail open (allow request)
     expect(nextFunction).toHaveBeenCalled();

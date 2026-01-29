@@ -48,6 +48,7 @@ export class RateLimitService {
       await redis.zAdd(key, { score: now, value: `${now}` });
 
       // Set expiration on the key to clean up automatically
+      // Adding 1 second to prevent race conditions at window boundary
       await redis.expire(key, Math.ceil(config.windowMs / 1000) + 1);
 
       // Calculate reset time (end of current window)
