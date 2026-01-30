@@ -141,13 +141,20 @@ Quando o limite é excedido, a API retorna HTTP 429:
 
 #### API Keys de Teste
 
-Para desenvolvimento e testes, use as seguintes API keys:
+**⚠️ AVISO DE SEGURANÇA**: As API keys listadas abaixo são APENAS para desenvolvimento e testes locais. NUNCA use essas keys em ambientes de produção.
+
+Para desenvolvimento e testes locais, use as seguintes API keys:
 
 - **Free tier**: `free-api-key-123`
 - **Pro tier**: `pro-api-key-456`
 - **Enterprise tier**: `enterprise-api-key-789`
 
-**Nota**: Em produção, as API keys devem ser gerenciadas por um sistema de autenticação apropriado.
+**Nota Importante**: 
+- Em produção, as API keys devem ser gerenciadas por um sistema de autenticação seguro (ex: OAuth 2.0, JWT)
+- As keys devem ser armazenadas em um banco de dados com hash/criptografia
+- O mapeamento hardcoded no código (`src/middleware/rateLimitMiddleware.js`) deve ser substituído por consulta a banco de dados
+- Implemente um sistema de geração e rotação de API keys
+- Considere usar um serviço de gerenciamento de API keys como AWS API Gateway, Azure API Management, ou Kong
 
 ## 📊 Os Três Pilares do FinOps
 

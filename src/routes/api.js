@@ -15,15 +15,7 @@ router.get('/costs', (req, res) => {
   });
 });
 
-/**
- * Rota de health check (sem rate limiting)
- */
-router.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString()
-  });
-});
+
 
 /**
  * Rota de informações de rate limit
@@ -35,11 +27,17 @@ router.get('/rate-limit-info', (req, res) => {
     reset: res.getHeader('X-RateLimit-Reset')
   };
 
-  res.json({
+  const response = {
     message: 'Rate limit information',
-    rateLimit: headers,
-    resetTime: new Date(headers.reset * 1000).toISOString()
-  });
+    rateLimit: headers
+  };
+
+  // Only add resetTime if reset header is valid
+  if (headers.reset && !isNaN(headers.reset)) {
+    response.resetTime = new Date(headers.reset * 1000).toISOString();
+  }
+
+  res.json(response);
 });
 
 module.exports = router;

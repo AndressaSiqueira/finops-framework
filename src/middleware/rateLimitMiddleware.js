@@ -60,6 +60,7 @@ async function rateLimitMiddleware(req, res, next) {
     multi.zRemRangeByScore(redisKey, 0, windowStart);
     
     // Adiciona novo registro com timestamp atual
+    // Usa timestamp + random para garantir unicidade mesmo em alta concorrência
     multi.zAdd(redisKey, { score: now, value: `${now}-${Math.random()}` });
     
     // Conta número de requisições na janela
@@ -81,6 +82,8 @@ async function rateLimitMiddleware(req, res, next) {
     res.setHeader('X-RateLimit-Reset', resetTime);
 
     // Verifica se o limite foi excedido
+    // Nota: count inclui a requisição atual, então se max=100, a 100ª requisição
+    // é permitida (count=100) e a 101ª é rejeitada (count=101)
     if (count > max) {
       logger.warn('Rate limit exceeded', {
         apiKey: apiKey.substring(0, 10) + '...',
@@ -112,8 +115,15 @@ async function rateLimitMiddleware(req, res, next) {
       stack: error.stack
     });
     
-    // Em caso de erro, permite a requisição prosseguir
-    // para não bloquear a aplicação se o Redis estiver indisponível
+    // AVISO DE SEGURANÇA: Em caso de erro no Redis, a requisição é permitida
+    // para não bloquear a aplicação. Isso pode ser explorado durante indisponibilidade do Redis.
+    // Em produção, considere implementar rate limiting em memória como fallback
+    // ou retornar 503 Service Unavailable se rate limiting é crítico para segurança.
+    logger.warn('Rate limiting bypassed due to Redis error - potential security risk', {
+      apiKey: req.headers['x-api-key']?.substring(0, 10) + '...',
+      ip: req.ip
+    });
+    
     next();
   }
 }

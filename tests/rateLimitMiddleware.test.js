@@ -211,7 +211,7 @@ describe('Rate Limiting Middleware', () => {
         .set('X-API-Key', 'pro-api-key-456')
         .expect(200);
 
-      // A contagem do pro deve estar em 99 (limite de 1000)
+      // A contagem do pro tier deve estar próxima do máximo (limite de 1000)
       const remaining = parseInt(response.headers['x-ratelimit-remaining']);
       expect(remaining).toBeGreaterThan(990); // Deve estar próximo do máximo
     });

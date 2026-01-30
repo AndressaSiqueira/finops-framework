@@ -60,14 +60,18 @@ app.use((err, req, res, next) => {
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, closing server gracefully');
-  await closeRedisClient();
-  process.exit(0);
+  server.close(async () => {
+    await closeRedisClient();
+    process.exit(0);
+  });
 });
 
 process.on('SIGINT', async () => {
   logger.info('SIGINT received, closing server gracefully');
-  await closeRedisClient();
-  process.exit(0);
+  server.close(async () => {
+    await closeRedisClient();
+    process.exit(0);
+  });
 });
 
 // Start server
