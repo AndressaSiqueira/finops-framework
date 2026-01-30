@@ -24,7 +24,7 @@ FinOps (Financial Operations) é uma disciplina de gerenciamento financeiro de n
 ### 💰 Gestão Financeira Inteligente
 - **Dashboard de Custos Interativo**: Visualize seus gastos Azure em tempo real com gráficos intuitivos e filtros personalizáveis
 - **Análise Preditiva com IA**: Use Azure AI Hub para prever custos futuros e identificar anomalias antes que impactem seu orçamento
-- **Alertas Inteligentes**: Receba notificações proativas quando detectadas anomalias de gastos ou ultrapassados limites orçamentários
+- **Alertas Inteligentes**: Receba notificações proativas quando forem detectadas anomalias de gastos ou ultrapassados limites orçamentários
 
 ### 🎯 Otimização de Custos
 - **Recomendações Automatizadas**: Identifique recursos subutilizados e receba sugestões de economia baseadas em machine learning
