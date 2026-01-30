@@ -151,7 +151,7 @@ Como implementamos:
 ### 💹 Dashboard de Custos
 Tenha controle total sobre seus gastos Azure com visualizações poderosas:
 - 📊 **Visualização Temporal**: Analise custos por dia, semana, mês ou período customizado
-- 🏢 **Breakdown Multi-dimensional**: Organize por serviço Azure, resource group, localização ou tags
+- 🏢 **Breakdown Multidimensional**: Organize por serviço Azure, resource group, localização ou tags
 - 📈 **Análise de Tendências**: Identifique padrões de crescimento e sazonalidade
 - 🔍 **Comparação Temporal**: Compare gastos mês a mês, trimestre a trimestre, ou ano a ano
 - 🎯 **Filtros Avançados**: Combine múltiplos filtros para análises específicas
