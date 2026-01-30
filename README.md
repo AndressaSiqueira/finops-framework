@@ -82,8 +82,72 @@ AZURE_AI_HUB_KEY=your-ai-hub-key
 
 # Application Settings
 PORT=3000
+NODE_ENV=development
 LOG_LEVEL=info
+
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+# Rate Limiting Configuration
+RATE_LIMIT_FREE_MAX=100
+RATE_LIMIT_FREE_WINDOW=3600
+RATE_LIMIT_PRO_MAX=1000
+RATE_LIMIT_PRO_WINDOW=3600
+RATE_LIMIT_ENTERPRISE_MAX=10000
+RATE_LIMIT_ENTERPRISE_WINDOW=3600
 ```
+
+### Rate Limiting
+
+A API implementa rate limiting por API key para proteger contra abusos e garantir qualidade de serviço. Diferentes limites são aplicados conforme o tier do cliente:
+
+#### Tiers Disponíveis
+
+| Tier | Limite | Janela de Tempo |
+|------|--------|----------------|
+| Free | 100 requisições | 3600 segundos (1 hora) |
+| Pro | 1000 requisições | 3600 segundos (1 hora) |
+| Enterprise | 10000 requisições | 3600 segundos (1 hora) |
+
+#### Usando a API com Rate Limiting
+
+Todas as requisições para `/api/*` devem incluir o header `X-API-Key`:
+
+```bash
+curl -H "X-API-Key: your-api-key" http://localhost:3000/api/costs
+```
+
+#### Headers de Rate Limit
+
+Cada resposta inclui headers informativos sobre o rate limiting:
+
+- `X-RateLimit-Limit`: Número máximo de requisições permitidas na janela
+- `X-RateLimit-Remaining`: Número de requisições restantes na janela atual
+- `X-RateLimit-Reset`: Timestamp Unix quando o contador será resetado
+
+#### Erro 429 - Too Many Requests
+
+Quando o limite é excedido, a API retorna HTTP 429:
+
+```json
+{
+  "error": "Too Many Requests",
+  "message": "Rate limit exceeded. Maximum 100 requests per 3600 seconds allowed.",
+  "retryAfter": 3600
+}
+```
+
+#### API Keys de Teste
+
+Para desenvolvimento e testes, use as seguintes API keys:
+
+- **Free tier**: `free-api-key-123`
+- **Pro tier**: `pro-api-key-456`
+- **Enterprise tier**: `enterprise-api-key-789`
+
+**Nota**: Em produção, as API keys devem ser gerenciadas por um sistema de autenticação apropriado.
 
 ## 📊 Os Três Pilares do FinOps
 
